@@ -13,14 +13,8 @@ rand_state=1000
 # read in the data
 df = pd.read_csv("/content/full_data_flightdelay.csv")
 
-df_subset = df[["MONTH","DAY_OF_WEEK","DEP_DEL15","DEP_TIME_BLK","CONCURRENT_FLIGHTS","NUMBER_OF_SEATS","CARRIER_NAME","DEPARTING_AIRPORT","PRCP","SNOW","TMAX","AWND"]]
+df_subset = df[["MONTH","DAY_OF_WEEK","DEP_DEL15","CARRIER_NAME","DEPARTING_AIRPORT","PRCP","SNOW","TMAX","AWND"]]
 df_subset.head()
-
-value_counts = df_subset["DEP_TIME_BLK"].value_counts().sort_index(ascending=True)
-# Create a dictionary to map each unique value to a unique number
-value_to_num = {value: i for i, value in enumerate(value_counts.index)}
-# Create a new column in the DataFrame containing the unique number for each value
-df_subset["DEP_TIME_BLK_int_label"] = df_subset["DEP_TIME_BLK"].map(value_to_num)
 
 #looking at the "Carrier Name" for each Airline, We want to use this as a feature but we have to convert it from strings to an int
 value_counts = df_subset["CARRIER_NAME"].value_counts().sort_index(ascending=True)
@@ -44,7 +38,7 @@ df_subset["DEPARTING_AIRPORT_int_label"] = df_subset["DEPARTING_AIRPORT"].map(va
 pd.crosstab(df['DEP_DEL15'], df['DEP_DEL15'], normalize='all')*100
 
 # Pre-processing
-df_subset2 = df_subset[["MONTH","DAY_OF_WEEK","DEP_DEL15","CONCURRENT_FLIGHTS","NUMBER_OF_SEATS","PRCP","SNOW","TMAX","AWND"]]
+df_subset2 = df_subset[["MONTH","DAY_OF_WEEK","DEP_DEL15","PRCP","SNOW","TMAX","AWND","CARRIER_NAME_int_label","DEPARTING_AIRPORT_int_label"]]
 final_df = df_subset2.dropna()
 
 # choose independant and dependant vars
