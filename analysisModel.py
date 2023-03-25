@@ -4,14 +4,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
+from sklearn.utils.validation import column_or_1d
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+
 rand_state=1000
 
 # read in the data
-dfAirports = <insert here>
-dfFlights = <>
-dfWeather = <>
+df = pd.read_csv("/content/full_data_flightdelay.csv")
 
 def predictWeatherDelay():
     # view target variable proportions
