@@ -1,40 +1,30 @@
 import requests
 import datetime
-import pandas as pd
+import joblib
+from weather import getWeatherForecast
 
 
-def getAirportInfo():
-    with open("airports.csv", "r") as handle:
-        df = pd.read_csv(handle, index_col='IATA')
-    return df
+def loadParams():
+    airports = joblib.load('trainingData/airports.pkl')
+    carriers = joblib.load('trainingData/carriers.pkl')
+
+    return airports, carriers
 
 
-FLIGHT_COLS = [
-        'DEP_DEL15',
-        'DEPARTING_AIRPORT',
-        'LATITUDE',
-        'LONGITUDE',
-        'PRCP',
-        'SNOW',
-        'SNWD',
-        'TMAX',
-        'AWND'
-        ]
+def convertAirportToInt(name, map):
+    conversion = map[map['DEPARTING_AIRPORT'] == name]
+    return conversion['DEPARTING_AIRPORT_int_label'] if conversion.size > 0 else 0
 
 
-def getHistoricFlightData():
-    with open("full_data_flightdelay.csv", "r") as handle:
-        df = pd.read_csv(handle, usecols=FLIGHT_COLS)
-
-    df['DEPARTING_AIRPORT'] = df['DEPARTING_AIRPORT'].str.replace(' Airport', '')
-    return df
+def convertCarrierToInt(name, map):
+    conversion = map[map['CARRIER_NAME'] == name]
+    return conversion['CARRIER_NAME_int_label'] if conversion.size > 0 else 0
 
 
-def getFlightInfo(flight_no : str, target_date : datetime.datetime) -> dict:
-    date_formatted = target_date.strftime("%Y-%m-%d")
-    url = f"https://aerodatabox.p.rapidapi.com/flights/number/{flight_no}/{date_formatted}"
+def getFlightInfo(flight_no : str) -> list:
+    url = f"https://aerodatabox.p.rapidapi.com/flights/number/{flight_no}"
 
-    querystring = {"withAircraftImage":"false","withLocation":"false"}
+    querystring = {"withAircraftImage":"false","withLocation":"true"}
 
     headers = {
         "X-RapidAPI-Key": "3e0d295e86msh9de57d9cb1d10d6p10295cjsn454e1f232977",
@@ -43,4 +33,35 @@ def getFlightInfo(flight_no : str, target_date : datetime.datetime) -> dict:
 
     response = requests.request("GET", url, headers=headers, params=querystring)
 
-    return response.json()
+    # input has [MONTH, DAY OF WEEK, PRCP, SNOW, TMAX, AWND, CARRIER_NAME_int_label, DEPARTING_AIRPORT_int_label]
+    response = response.json()[0]
+
+    airports, carriers = loadParams()
+
+    departing = response['departure']
+
+    dName = departing['airport']['name']
+    dDate = datetime.datetime.strptime(departing['scheduledTimeLocal'], "%Y-%m-%d %H:%M%z")
+
+    output = [0 for i in range(8)]
+    output[0] = dDate.month
+    output[1] = int(dDate.strftime('%w')) + 1
+
+    weather = getWeatherForecast(dDate, departing['airport']['iata'])
+    weather = weather['daily']
+
+    output[2] = weather['precipitation_sum'][0]
+    output[3] = weather['snowfall_sum'][0]
+    output[4] = weather['temperature_2m_max'][0]
+    output[5] = weather['windspeed_10m_max'][0]
+
+    output[6] = convertCarrierToInt(response['airline']['name'], carriers)  # convert to int label
+    output[7] = convertAirportToInt(dName, airports)                        # convert to int label
+
+    return [output]
+
+
+if __name__ == '__main__':
+    flight_no = 'DL56'
+    date = datetime.datetime(year=2023, month=3, day=26)
+    print(getFlightInfo(flight_no, date))

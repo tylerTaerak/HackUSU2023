@@ -1,12 +1,14 @@
 from flask import Flask
 from flask import request, jsonify, render_template
 from flask_cors import CORS
-import datetime
+from loadModel import loadModel, predict
 
 from airports import getFlightInfo
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/flights/query": {"origins": "*"}})
+
+model = loadModel()
 
 
 @app.route('/flights', methods=['GET'])
@@ -17,10 +19,15 @@ def index():
 @app.route('/flights/query', methods=['POST'])
 def query():
     flight_no = request.json['flightNumber']
-    date = datetime.datetime.strptime(request.json['flightDate'], "%Y-%m-%d")
 
-    predictionData = 'No predictions available yet' #getFlightInfo(flight_no, date)
-    prediction = {'prediction': predictionData}
+    # try:
+    predictionData = getFlightInfo(flight_no)
+    if predict(model, predictionData):
+        prediction = {'prediction': "Your flight is likely to be delayed"}
+    else:
+        prediction = {'prediction': predict(model, predictionData)}
+    # except:
+    #     prediction = {'prediction': "could not find data for that flight number"}
 
     response = jsonify(prediction)
     response.headers.add('Access-Control-Allow-Origin', '*')

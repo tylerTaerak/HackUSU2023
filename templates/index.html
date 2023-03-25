@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title></title>
+        <title>Predict Flight Delays</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
     </head>
     <body>
-        <div>
+        <div class="title">
             Predict Flight Cancellations
         </div>
 
@@ -16,14 +16,11 @@
             <label for="flight-number">Flight Number:</label>
             <input type="text" id="flightNumber" name="flightNumber" class=form-input><br><br>
 
-            <label for="flight-date">Date:</label>
-            <input type="date" id="flightDate" name="flightDate" class=form-input><br><br>
-
             <input type="submit" value="Search" class=form-submit>
           </form>
         </div>
 
-      <div id="data-container"></div>
+      <div class="data-container" id="data-container"> </div>
 
       <script>
         async function addData() {
@@ -37,15 +34,15 @@
           newDiv.innerHTML = data['prediction'];
 
           // Append the new div to the data-container element
-          const dataContainer = document.getElementById("data-container");
+          var dataContainer = document.getElementById("data-container");
+            dataContainer.innerHTML = '';
           dataContainer.appendChild(newDiv);
         }
 
         async function fetchData() {
             const flightNumber = document.querySelector('#flightNumber').value;
-            const flightDate = document.querySelector('#flightDate').value;
           const url = 'http://localhost:5000/flights/query';
-          const data = { flightNumber, flightDate };
+          const data = { flightNumber };
 
           const options = {
             method: 'POST',
@@ -65,7 +62,6 @@
           }
         }
       </script>
-
     </body>
-</html>>
+</html>
 
