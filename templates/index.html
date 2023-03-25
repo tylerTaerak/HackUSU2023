@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    </head>
+    <body>
+        <div>
+            Predict Flight Cancellations
+        </div>
+
+        <div class=form-container>
+          <form onsubmit="addData(); return false;">
+            <label for="flight-number">Flight Number:</label>
+            <input type="text" id="flightNumber" name="flightNumber" class=form-input><br><br>
+
+            <label for="flight-date">Date:</label>
+            <input type="date" id="flightDate" name="flightDate" class=form-input><br><br>
+
+            <input type="submit" value="Search" class=form-submit>
+          </form>
+        </div>
+
+      <div id="data-container"></div>
+
+      <script>
+        async function addData() {
+          // Perform a query to fetch data
+          const data = await fetchData();
+
+          // Create a new div element
+          const newDiv = document.createElement("div");
+
+          // Add the data to the div's innerHTML
+          newDiv.innerHTML = data['prediction'];
+
+          // Append the new div to the data-container element
+          const dataContainer = document.getElementById("data-container");
+          dataContainer.appendChild(newDiv);
+        }
+
+        async function fetchData() {
+            const flightNumber = document.querySelector('#flightNumber').value;
+            const flightDate = document.querySelector('#flightDate').value;
+          const url = 'http://localhost:5000/flights/query';
+          const data = { flightNumber, flightDate };
+
+          const options = {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          };
+
+          try {
+            const response = await fetch(url, options);
+            const result = await response.json();
+            return result;
+          } catch (error) {
+            console.error('Error fetching data:', error);
+            return {error: 'something went wrong retrieving that data'};
+          }
+        }
+      </script>
+
+    </body>
+</html>>
+

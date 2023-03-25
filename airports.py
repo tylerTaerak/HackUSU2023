@@ -2,16 +2,32 @@ import requests
 import datetime
 import pandas as pd
 
+
 def getAirportInfo():
     with open("airports.csv", "r") as handle:
-        df = pd.read_csv(handle)
+        df = pd.read_csv(handle, index_col='IATA')
     return df
 
-def getHistoricFlightData():
-    with open("flights.csv", "r") as handle:
-        df = pd.read_csv(handle)
 
-    return df 
+FLIGHT_COLS = [
+        'DEP_DEL15',
+        'DEPARTING_AIRPORT',
+        'LATITUDE',
+        'LONGITUDE',
+        'PRCP',
+        'SNOW',
+        'SNWD',
+        'TMAX',
+        'AWND'
+        ]
+
+
+def getHistoricFlightData():
+    with open("full_data_flightdelay.csv", "r") as handle:
+        df = pd.read_csv(handle, usecols=FLIGHT_COLS)
+
+    df['DEPARTING_AIRPORT'] = df['DEPARTING_AIRPORT'].str.replace(' Airport', '')
+    return df
 
 
 def getFlightInfo(flight_no : str, target_date : datetime.datetime) -> dict:
