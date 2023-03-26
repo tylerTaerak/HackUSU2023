@@ -27,7 +27,7 @@ def getFlightInfo(flight_no : str) -> list:
     querystring = {"withAircraftImage":"false","withLocation":"true"}
 
     headers = {
-        "X-RapidAPI-Key": "3e0d295e86msh9de57d9cb1d10d6p10295cjsn454e1f232977",
+        "X-RapidAPI-Key": "Insert key here",
         "X-RapidAPI-Host": "aerodatabox.p.rapidapi.com"
     }
 
